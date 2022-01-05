@@ -1,0 +1,272 @@
+{
+  "data": [
+    {
+      "entities": {
+        "mentions": [
+          {
+            "start": 3,
+            "end": 12,
+            "username": "kektoken",
+            "id": "1274783472507330562"
+          }
+        ],
+        "urls": [
+          {
+            "start": 66,
+            "end": 89,
+            "url": "https://t.co/B3YkEzSU39",
+            "expanded_url": "https://cryptokek-com.medium.com/8b7719de674b",
+            "display_url": "cryptokek-com.medium.com/8b7719de674b",
+            "images": [
+              {
+                "url": "https://pbs.twimg.com/news_img/1478450451410477057/fwEfWXeO?format=png&name=orig",
+                "width": 1200,
+                "height": 600
+              },
+              {
+                "url": "https://pbs.twimg.com/news_img/1478450451410477057/fwEfWXeO?format=png&name=150x150",
+                "width": 150,
+                "height": 150
+              }
+            ],
+            "status": 200,
+            "title": "New Year, New Kek — Time to Level up",
+            "description": "First and foremost, this article outlines the intent to migrate our Uniswap liquidity over to Spookyswap on the Fantom network. Target…",
+            "unwound_url": "https://cryptokek-com.medium.com/8b7719de674b"
+          }
+        ],
+        "hashtags": [
+          {
+            "start": 14,
+            "end": 21,
+            "tag": "Fantom"
+          }
+        ]
+      },
+      "text": "RT @kektoken: #Fantom is officially becoming our home network! 🎇\n\nhttps://t.co/B3YkEzSU39",
+      "id": "1478486990383456263"
+    },
+    {
+      "entities": {
+        "cashtags": [
+          {
+            "start": 15,
+            "end": 19,
+            "tag": "FTM"
+          }
+        ],
+        "mentions": [
+          {
+            "start": 3,
+            "end": 13,
+            "username": "FTMAlerts",
+            "id": "332315952"
+          }
+        ]
+      },
+      "text": "RT @FTMAlerts: $FTM Daily stats for 1-3-2021\n\n🐸Total TX: 764,978\n⌛️AVG Block Time (TTF): 0.91s\n✅Total Blocks: 95,285\n😍New Wallets: 12,261…",
+      "id": "1478434200189808642"
+    },
+    {
+      "entities": {
+        "cashtags": [
+          {
+            "start": 111,
+            "end": 116,
+            "tag": "LQDR"
+          }
+        ],
+        "mentions": [
+          {
+            "start": 3,
+            "end": 16,
+            "username": "LiquidDriver",
+            "id": "1385267328225533953"
+          }
+        ],
+        "urls": [
+          {
+            "start": 87,
+            "end": 110,
+            "url": "https://t.co/QrXNfcVtkY",
+            "expanded_url": "https://www.liquiddriver.finance/",
+            "display_url": "liquiddriver.finance",
+            "status": 200,
+            "title": "Liquid Driver",
+            "description": "On-Demand Liquidity as a service on Fantom Opera",
+            "unwound_url": "https://www.liquiddriver.finance/"
+          }
+        ],
+        "hashtags": [
+          {
+            "start": 117,
+            "end": 124,
+            "tag": "LQDRv3"
+          }
+        ]
+      },
+      "text": "RT @LiquidDriver: 150,000,000 total value locked 🌊\n\n100M feels like yesterday. Was it?\nhttps://t.co/QrXNfcVtkY\n$LQDR #LQDRv3 https://t.co/f…",
+      "id": "1478433871297654784"
+    },
+    {
+      "entities": {
+        "mentions": [
+          {
+            "start": 3,
+            "end": 15,
+            "username": "Screamdotsh",
+            "id": "1391881762914160642"
+          },
+          {
+            "start": 77,
+            "end": 89,
+            "username": "Screamdotsh",
+            "id": "1391881762914160642"
+          }
+        ]
+      },
+      "text": "RT @Screamdotsh: Just a little sneak peak into our new analytics console for @Screamdotsh.\n\nEvaluate your lend/borrow positions across time…",
+      "id": "1478433826582179840"
+    },
+    {
+      "entities": {
+        "urls": [
+          {
+            "start": 211,
+            "end": 234,
+            "url": "https://t.co/UESESwpPjB",
+            "expanded_url": "https://fantom.foundation/blog/fantom-2021-recap/",
+            "display_url": "fantom.foundation/blog/fantom-20…",
+            "images": [
+              {
+                "url": "https://pbs.twimg.com/news_img/1478398851983810564/0UP7jQqu?format=jpg&name=orig",
+                "width": 1920,
+                "height": 1080
+              },
+              {
+                "url": "https://pbs.twimg.com/news_img/1478398851983810564/0UP7jQqu?format=jpg&name=150x150",
+                "width": 150,
+                "height": 150
+              }
+            ],
+            "status": 200,
+            "title": "Fantom 2021 Recap",
+            "description": "The Fantom team sends its best wishes for the New Year to the Fantom community! We are humbled and grateful for the support that you have shown: thank you for accompanying us on this incredible journey.  Fantom grew immensely in 2021. Hundreds of thousands of users, hundreds of dApps, and a fast and inexpensive network […]",
+            "unwound_url": "https://fantom.foundation/blog/fantom-2021-recap/"
+          }
+        ]
+      },
+      "text": "2021 has been a pivotal year for Fantom. \n\nHundreds of thousands of users and hundreds of dApps made exponential growth possible. \n\nHere's a recap of the most notable events that happened at Fantom last year 👇\n\nhttps://t.co/UESESwpPjB",
+      "id": "1478398784619089930"
+    },
+    {
+      "entities": {
+        "mentions": [
+          {
+            "start": 3,
+            "end": 14,
+            "username": "LunarCrush",
+            "id": "988992203568562176"
+          }
+        ]
+      },
+      "text": "RT @LunarCrush: 🥇With leading relative combined social + market activity, Fantom has hit the #1 LunarCrush AltRank™ out of the top 3,418 co…",
+      "id": "1478281786794909698"
+    },
+    {
+      "entities": {
+        "cashtags": [
+          {
+            "start": 31,
+            "end": 35,
+            "tag": "FTM"
+          }
+        ],
+        "mentions": [
+          {
+            "start": 3,
+            "end": 16,
+            "username": "AustinBarack",
+            "id": "830960273808826368"
+          }
+        ]
+      },
+      "text": "RT @AustinBarack: 1/n In 2021, $FTM achieved incredible growth across all key metrics. I expect this growth to continue, with Fantom positi…",
+      "id": "1478252120151318528"
+    },
+    {
+      "entities": {
+        "mentions": [
+          {
+            "start": 3,
+            "end": 15,
+            "username": "Spirit_Swap",
+            "id": "1372743955444498433"
+          }
+        ]
+      },
+      "text": "RT @Spirit_Swap: SpiritSwap inaugural DAO driven Snapshot is now live!🗳️\n\nMotion to approve the proposed SpiritSwap multi-sig: https://t.co…",
+      "id": "1478134127920840704"
+    },
+    {
+      "entities": {
+        "cashtags": [
+          {
+            "start": 102,
+            "end": 106,
+            "tag": "BOO"
+          }
+        ],
+        "mentions": [
+          {
+            "start": 3,
+            "end": 14,
+            "username": "SpookySwap",
+            "id": "1372756210433204235"
+          }
+        ],
+        "hashtags": [
+          {
+            "start": 74,
+            "end": 78,
+            "tag": "DEX"
+          }
+        ]
+      },
+      "text": "RT @SpookySwap: The SpookySwap DEX now has over 1.2B TVL! 🏆\n\n1.16B in the #DEX 🏦\n76M in single-staked $BOO 🐈‍⬛\n\nNot only that, but also ove…",
+      "id": "1478132842458943489"
+    },
+    {
+      "entities": {
+        "cashtags": [
+          {
+            "start": 16,
+            "end": 20,
+            "tag": "BOO"
+          },
+          {
+            "start": 122,
+            "end": 126,
+            "tag": "FTM"
+          }
+        ],
+        "mentions": [
+          {
+            "start": 3,
+            "end": 14,
+            "username": "SpookySwap",
+            "id": "1372756210433204235"
+          }
+        ]
+      },
+      "text": "RT @SpookySwap: $BOO's Light Mode is here! ☀️😺 / 🌛🐈‍⬛\n\n⚙️ Our settings menu has been expanded to include:\n\n⛽️ Set Default $FTM Gas Price\n🌙…",
+      "id": "1478132505207517185"
+    }
+  ],
+  "meta": {
+    "oldest_id": "1478132505207517185",
+    "newest_id": "1478486990383456263",
+    "result_count": 10,
+    "next_token": "7140dibdnow9c7btw3z3q7qjyx87wkcvvztvbxx6fq62d"
+  }
+}
