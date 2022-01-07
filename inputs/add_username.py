@@ -20,7 +20,9 @@ account_id = r.json()['data']['id']
 timestamp = datetime.datetime.utcnow()
 input = {"username": username,
          "account_id": account_id,
-         "timestamp": timestamp}
+         "timestamp": timestamp,
+         "has_been_scraped": False,
+         }
 inputs = db.input
 inserted_id = inputs.insert_one(input).inserted_id
 
