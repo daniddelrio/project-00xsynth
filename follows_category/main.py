@@ -11,6 +11,9 @@ def categorize_follows(db):
 
     for account in data.find():
         discord_urls = []
+        if 'entities' not in account:
+            continue
+        
         entities = account['entities']
 
         if 'url' in entities and 'urls' in entities['url']:
