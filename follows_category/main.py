@@ -6,14 +6,14 @@ def categorize_follows(db):
     timestamp = datetime.datetime.utcnow()
     data = db.temp_followed
 
-    approved_accounts = []
+    discord_links = []
     watchlist = []
 
     for account in data.find():
         discord_urls = []
         if 'entities' not in account:
             continue
-        
+
         entities = account['entities']
 
         if 'url' in entities and 'urls' in entities['url']:
@@ -27,22 +27,18 @@ def categorize_follows(db):
                     discord_urls.append(url['expanded_url'])
 
         if len(discord_urls) > 0:
-            discord_urls = [{'url': url, 'verified': False}
+            discord_urls = [UpdateOne(
+                            {'url': account['url']},
+                            {
+                                'account_id': account['id'],
+                                'url': url,
+                                'joined': False,
+                                'verified': False,
+                                'created_at': timestamp
+                            },
+                            upsert=True)
                             for url in discord_urls]
-            approved_accounts.append(
-                UpdateOne({'account_id': account['id']},
-                          {'$setOnInsert': {
-                              'account_id': account['id'],
-                              'discord_urls': discord_urls,
-                              'timestamp': timestamp,
-                          }},
-                          upsert=True
-                          ))
-            # approved_accounts.append({
-            #     'account_id': account['id'],
-            #     'discord_urls': discord_urls,
-            #     'timestamp': timestamp,
-            # })
+            discord_links.extend(discord_urls)
         else:
             watchlist.append(
                 UpdateOne({'account_id': account['id']},
@@ -61,9 +57,9 @@ def categorize_follows(db):
     watchlist_results = watchlist_collection.bulk_write(watchlist)
     print(f"Added {watchlist_results.upserted_count} entries to watchlist!")
 
-    approved_collection = db.approved_account
-    approved_results = approved_collection.bulk_write(approved_accounts)
+    links_collection = db.discord_link
+    discord_results = links_collection.bulk_write(discord_links)
     print(
-        f"Added {approved_results.upserted_count} entries to approved_account!")
+        f"Added {discord_results.upserted_count} entries to discord_link!")
 
     data.drop()
