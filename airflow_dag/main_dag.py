@@ -4,7 +4,7 @@ from textwrap import dedent
 # The DAG object; we'll need this to instantiate a DAG
 from airflow import DAG
 
-from project_00xsynth.airflow_dag.pipeline_class import scrape_follows, categorize_follows
+from project_00xsynth.airflow_dag.pipeline_class import scrape_follows, categorize_follows, track_watchlist
 
 # These args will get passed on to each operator
 # You can override them on a per-task basis during operator initialization
@@ -68,3 +68,14 @@ with DAG(
     # {% endfor %}
     # """
     # )
+
+with DAG(
+    'watchlist_dag',
+    default_args=default_args,
+    description='DAG for tracking the watchlist to see if they have a Discord link',
+    schedule_interval=timedelta(days=1),
+    start_date=datetime(2021, 1, 1),
+    catchup=False,
+) as dag:
+
+    t1 = track_watchlist()
