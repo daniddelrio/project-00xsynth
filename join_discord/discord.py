@@ -1,3 +1,4 @@
+from pymongo import MongoClient
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
@@ -5,9 +6,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 import time
 from pymongo import UpdateOne
-
-DISCORD_EMAIL = os.environ.get('DISCORD_EMAIL')
-DISCORD_PASSWORD = os.environ.get('DISCORD_PASSWORD')
+import traceback
 
 
 def join_discord(discord_email, discord_password, db):
@@ -24,14 +23,15 @@ def join_discord(discord_email, discord_password, db):
     for link in discord_links:
         try:
             driver.get(link['url'])
-            driver.set_window_size(1440, 816)
-            element_exists_number = len(driver.find_elements(
-                By.CSS_SELECTOR, ".marginTop8-24uXGp > .contents-3ca1mk"))
+            time.sleep(3)
+            element_exists_number = len(driver.find_elements(By.XPATH,
+                                                             "//*[contains(text(),'Already have an account')]"))
+            print(element_exists_number)
 
             # Check if the "have an account already" button exists. If it does, then log in with our credentials
             if driver.execute_script("return (arguments[0] == 1)", element_exists_number):
                 driver.find_element(
-                    By.CSS_SELECTOR, ".marginTop8-24uXGp > .contents-3ca1mk").click()
+                    By.XPATH, "//*[contains(text(),'Already have an account')]").find_element(By.XPATH, "./..").click()
                 driver.find_element(
                     By.NAME, "email").send_keys(discord_email)
                 driver.find_element(By.CSS_SELECTOR, ".wrapper-1f5byN").click()
@@ -41,14 +41,15 @@ def join_discord(discord_email, discord_password, db):
                 driver.find_element(By.CSS_SELECTOR, ".button-1cRKG6").click()
             else:
                 driver.find_element(
-                    By.CSS_SELECTOR, ".marginTop40-Q4o1tS").click()
+                    By.XPATH, "//div[text()='Accept Invite']").find_element(By.XPATH, "./..").click()
 
             updates.append(UpdateOne({'_id': link['_id']},
                                      {'$set': {
                                          'joined': True
                                      }},
                                      ))
-        except:
+        except Exception as e:
+            print(traceback.format_exc())
             errors.append(link)
         time.sleep(7)
 

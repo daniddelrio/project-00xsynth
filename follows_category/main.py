@@ -28,14 +28,14 @@ def categorize_follows(db):
 
         if len(discord_urls) > 0:
             discord_urls = [UpdateOne(
-                            {'url': account['url']},
-                            {
+                            {'url': url},
+                            {"$setOnInsert": {
                                 'account_id': account['id'],
                                 'url': url,
                                 'joined': False,
                                 'verified': False,
                                 'created_at': timestamp
-                            },
+                            }},
                             upsert=True)
                             for url in discord_urls]
             discord_links.extend(discord_urls)

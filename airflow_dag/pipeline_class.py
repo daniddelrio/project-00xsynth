@@ -1,3 +1,4 @@
+from airflow.models import Variable
 import os
 from pymongo import MongoClient
 from airflow.decorators import task
@@ -13,9 +14,9 @@ load_dotenv()
 
 @task(task_id="scrape_followed_of_inputs")
 def scrape_follows():
-    twitter_token = os.environ.get('TWITTER_BEARER_TOKEN')
-    MONGODB_URI = os.environ.get('MONGODB_URI')
-    MONGODB_DATABASE = os.environ.get('MONGODB_DATABASE')
+    twitter_token = Variable.get('twitter_bearer_token')
+    MONGODB_URI = Variable.get('mongodb_uri')
+    MONGODB_DATABASE = Variable.get('mongodb_database')
 
     mongo_client = MongoClient(MONGODB_URI)
     db = mongo_client[MONGODB_DATABASE]
@@ -25,8 +26,8 @@ def scrape_follows():
 
 @task(task_id="categorize_follows")
 def categorize_follows():
-    MONGODB_URI = os.environ.get('MONGODB_URI')
-    MONGODB_DATABASE = os.environ.get('MONGODB_DATABASE')
+    MONGODB_URI = Variable.get('mongodb_uri')
+    MONGODB_DATABASE = Variable.get('mongodb_database')
 
     mongo_client = MongoClient(MONGODB_URI)
     db = mongo_client[MONGODB_DATABASE]
@@ -36,9 +37,9 @@ def categorize_follows():
 
 @task(task_id="track_watchlist")
 def track_watchlist():
-    twitter_token = os.environ.get('TWITTER_BEARER_TOKEN')
-    MONGODB_URI = os.environ.get('MONGODB_URI')
-    MONGODB_DATABASE = os.environ.get('MONGODB_DATABASE')
+    twitter_token = Variable.get('twitter_bearer_token')
+    MONGODB_URI = Variable.get('mongodb_uri')
+    MONGODB_DATABASE = Variable.get('mongodb_database')
 
     mongo_client = MongoClient(MONGODB_URI)
     db = mongo_client[MONGODB_DATABASE]
@@ -48,10 +49,10 @@ def track_watchlist():
 
 @task(task_id="join_discord")
 def join_discord():
-    discord_email = os.environ.get('DISCORD_EMAIL')
-    discord_password = os.environ.get('DISCORD_PASSWORD')
-    MONGODB_URI = os.environ.get('MONGODB_URI')
-    MONGODB_DATABASE = os.environ.get('MONGODB_DATABASE')
+    discord_email = Variable.get('discord_email')
+    discord_password = Variable.get('discord_password')
+    MONGODB_URI = Variable.get('mongodb_uri')
+    MONGODB_DATABASE = Variable.get('mongodb_database')
 
     mongo_client = MongoClient(MONGODB_URI)
     db = mongo_client[MONGODB_DATABASE]
