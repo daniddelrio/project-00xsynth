@@ -4,7 +4,7 @@ from textwrap import dedent
 # The DAG object; we'll need this to instantiate a DAG
 from airflow import DAG
 
-from project_00xsynth.airflow_dag.pipeline_class import scrape_follows, categorize_follows, track_watchlist, join_discord
+from project_00xsynth.airflow_dag.pipeline_class import scrape_follows, scrape_liked, categorize_follows, track_watchlist, join_discord
 
 # These args will get passed on to each operator
 # You can override them on a per-task basis during operator initialization
@@ -41,8 +41,10 @@ with DAG(
 ) as dag:
 
     t1 = scrape_follows()
-    t2 = categorize_follows()
-    t1 >> t2
+    t2 = scrape_liked()
+    t3 = categorize_follows()
+
+    [t1, t2] >> t3
 
     # t1.doc_md = dedent(
     #     """\

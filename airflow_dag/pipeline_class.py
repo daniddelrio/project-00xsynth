@@ -4,6 +4,7 @@ from pymongo import MongoClient
 from airflow.decorators import task
 
 from project_00xsynth.functions.scrape_follows import scrape_follows as scrape_follows_import
+from project_00xsynth.functions.scrape_liked import scrape_liked as scrape_liked_import
 from project_00xsynth.functions.follows_category import categorize_follows as categorize_follows_import
 from project_00xsynth.functions.track_watchlist import track_watchlist as track_watchlist_import
 from project_00xsynth.functions.join_discord import join_discord as join_discord_import
@@ -22,6 +23,18 @@ def scrape_follows():
     db = mongo_client[MONGODB_DATABASE]
 
     return scrape_follows_import(twitter_token, db)
+
+
+@task(task_id="scrape_liked_of_inputs")
+def scrape_liked():
+    twitter_token = Variable.get('twitter_bearer_token')
+    MONGODB_URI = Variable.get('mongodb_uri')
+    MONGODB_DATABASE = Variable.get('mongodb_database')
+
+    mongo_client = MongoClient(MONGODB_URI)
+    db = mongo_client[MONGODB_DATABASE]
+
+    return scrape_liked_import(twitter_token, db)
 
 
 @task(task_id="categorize_follows")
