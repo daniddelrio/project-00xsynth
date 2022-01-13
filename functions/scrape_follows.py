@@ -10,14 +10,14 @@ def scrape_follows(twitter_token, db):
     for input in inputs.find():
         account_id = input['account_id']
         if account_id:
+            # If it's already been scraped before, then we can just get the last 15 followed accounts of the person
             has_been_scraped = input['has_been_scraped']
 
             if has_been_scraped:
                 r = requests.get(
-                    f'https://api.twitter.com/2/users/{account_id}/following?user.fields=created_at,entities,description&max_results=15',
+                    f'https://api.twitter.com/2/users/{account_id}/following?user.fields=created_at,entities,description&max_results=20',
                     headers={'Authorization': f'Bearer {twitter_token}'})
                 res = r.json()
-                # followed_accounts.extend(res['data'])
                 followed_accounts.extend([UpdateOne({'id': follow['id']},
                                                     {'$setOnInsert': follow},
                                                     upsert=True

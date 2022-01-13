@@ -3,10 +3,10 @@ import os
 from pymongo import MongoClient
 from airflow.decorators import task
 
-from project_00xsynth.scrape_follows.main import scrape_follows as scrape_follows_import
-from project_00xsynth.follows_category.main import categorize_follows as categorize_follows_import
-from project_00xsynth.track_watchlist.main import track_watchlist as track_watchlist_import
-from project_00xsynth.join_discord.discord import join_discord as join_discord_import
+from project_00xsynth.functions.scrape_follows import scrape_follows as scrape_follows_import
+from project_00xsynth.functions.follows_category import categorize_follows as categorize_follows_import
+from project_00xsynth.functions.track_watchlist import track_watchlist as track_watchlist_import
+from project_00xsynth.functions.join_discord import join_discord as join_discord_import
 
 from dotenv import load_dotenv
 load_dotenv()
