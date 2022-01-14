@@ -14,7 +14,8 @@ def join_discord(discord_email, discord_password, db):
     # Pass in the `Service` instance with the `service` keyword:
     driver = webdriver.Chrome(service=service)
 
-    discord_links = db.discord_link.find({"joined": False})
+    # Limiting the automation to 10 at a time
+    discord_links = db.discord_link.find({"joined": False}).limit(10)
     updates = []
     errors_joining = []
     success_verifying = []
@@ -78,7 +79,7 @@ def join_discord(discord_email, discord_password, db):
                         By.XPATH, "//*[contains(text(),'Continue to Discord')]").find_element(By.XPATH, "./..").click()
                     time.sleep(3)
 
-                time.sleep(5)
+                time.sleep(7)
                 # Finding the channel that contains the word "verif" for "verify" or "verifications" or "rules"
                 found_channel = False
                 for channel in driver.find_elements(By.CSS_SELECTOR, ".mainContent-20q_Hp"):
@@ -93,7 +94,7 @@ def join_discord(discord_email, discord_password, db):
                     raise Exception("Was not able to find the verify channel")
 
                 # Verifying by clicking the first five reactions on the message
-                time.sleep(3)
+                time.sleep(4)
                 for count, reaction in enumerate(driver.find_elements(By.CLASS_NAME, "reaction-2A2y9y")):
                     if count >= 5:
                         break

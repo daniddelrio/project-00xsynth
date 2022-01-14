@@ -86,7 +86,7 @@ with DAG(
     'discord_dag',
     default_args=default_args,
     description='DAG for joining the Discord servers stored in the DB.',
-    schedule_interval=timedelta(hours=2),
+    schedule_interval=timedelta(minutes=45),
     start_date=datetime(2022, 1, 13),
     catchup=False,
 ) as dag_3:
