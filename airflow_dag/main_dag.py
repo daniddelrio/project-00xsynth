@@ -34,10 +34,10 @@ with DAG(
     'scrape_dag',
     default_args=default_args,
     description='DAG for scraping Twitter by tracking certain accounts',
-    schedule_interval=timedelta(days=1),
-    start_date=datetime(2021, 1, 1),
+    schedule_interval=timedelta(minutes=30),
+    start_date=datetime(2022, 1, 13),
     catchup=False,
-    tags=['example'],
+    tags=['example']
 ) as dag:
 
     t1 = scrape_follows()
@@ -75,8 +75,8 @@ with DAG(
     'watchlist_dag',
     default_args=default_args,
     description='DAG for tracking the watchlist to see if they have a Discord link',
-    schedule_interval=timedelta(days=1),
-    start_date=datetime(2021, 1, 1),
+    schedule_interval=timedelta(minutes=60),
+    start_date=datetime(2022, 1, 13),
     catchup=False,
 ) as dag_2:
 
@@ -86,8 +86,8 @@ with DAG(
     'discord_dag',
     default_args=default_args,
     description='DAG for joining the Discord servers stored in the DB.',
-    schedule_interval=timedelta(days=1),
-    start_date=datetime(2021, 1, 1),
+    schedule_interval=timedelta(hours=2),
+    start_date=datetime(2022, 1, 13),
     catchup=False,
 ) as dag_3:
 

@@ -5,9 +5,9 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 load_dotenv()
 
-MONGODB_URI = os.environ.get('MONGODB_URI')
-MONGODB_DATABASE = os.environ.get('MONGODB_DATABASE')
-TWITTER_BEARER_TOKEN = os.environ.get('TWITTER_BEARER_TOKEN')
+MONGODB_URI = os.environ.get('AIRFLOW_VAR_MONGODB_URI')
+MONGODB_DATABASE = os.environ.get('AIRFLOW_VAR_MONGODB_DATABASE')
+TWITTER_BEARER_TOKEN = os.environ.get('AIRFLOW_VAR_TWITTER_BEARER_TOKEN')
 
 mongo_client = MongoClient(MONGODB_URI)
 db = mongo_client[MONGODB_DATABASE]
