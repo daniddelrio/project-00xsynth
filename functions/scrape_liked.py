@@ -1,6 +1,7 @@
 from pymongo import MongoClient
 import requests
 from pymongo import UpdateOne
+import traceback
 
 
 def scrape_liked(twitter_token, db):
@@ -15,12 +16,13 @@ def scrape_liked(twitter_token, db):
                     f'https://api.twitter.com/2/users/{account_id}/liked_tweets?user.fields=id,description,entities,created_at&expansions=author_id',
                     headers={'Authorization': f'Bearer {twitter_token}'})
                 res = r.json()
-                liked_accounts.extend([UpdateOne({'id': follow['id']},
-                                                 {'$setOnInsert': follow},
-                                                 upsert=True
-                                                 ) for follow in res['includes']['users']])
+                if 'includes' in res and 'users' in res['includes']:
+                    liked_accounts.extend([UpdateOne({'id': follow['id']},
+                                                     {'$setOnInsert': follow},
+                                                     upsert=True
+                                                     ) for follow in res['includes']['users']])
             except:
-                pass
+                print(traceback.format_exc())
 
     temp_follows = db.temp_followed
     followed_results = temp_follows.bulk_write(liked_accounts)

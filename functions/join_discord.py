@@ -1,22 +1,36 @@
+from pymongo import MongoClient
+import os
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 import time
 from pymongo import UpdateOne
 import traceback
 
 
+class InvalidLinkException(Exception):
+    pass
+
+
 def join_discord(discord_email, discord_password, db):
     # Use the `install()` method to set `executabe_path` in a new `Service` instance:
     service = Service(executable_path=ChromeDriverManager().install())
 
-    # Pass in the `Service` instance with the `service` keyword:
-    driver = webdriver.Chrome(service=service)
+    options = Options()
+    # options.add_argument('--no-sandbox')
+    # options.add_argument('--disable-gpu')
+    options.headless = True
 
-    # Limiting the automation to 10 at a time
-    discord_links = db.discord_link.find({"joined": False}).limit(10)
+    # Pass in the `Service` instance with the `service` keyword:
+    driver = webdriver.Chrome(service=service, options=options)
+
+    # Limiting the automation to a few entries at a time
+    discord_links = db.discord_link.find(
+        {"joined": False, "valid": True}).limit(10)
     updates = []
+    invalid_links = []
     errors_joining = []
     success_verifying = []
 
@@ -26,6 +40,12 @@ def join_discord(discord_email, discord_password, db):
         try:
             driver.get(link['url'])
             time.sleep(3)
+            invite_invalid_number = len(driver.find_elements(By.XPATH,
+                                                             "//*[contains(text(),'Invite Invalid')]"))
+
+            if invite_invalid_number > 0:
+                raise InvalidLinkException("Invite link is invalid!")
+
             element_exists_number = len(driver.find_elements(By.XPATH,
                                                              "//*[contains(text(),'Already have an account')]"))
 
@@ -61,7 +81,14 @@ def join_discord(discord_email, discord_password, db):
                                        'joined': True
                                    }},
                                    )
-
+        except InvalidLinkException as e:
+            print(traceback.format_exc())
+            invalid_links.append(UpdateOne({'_id': link['_id']},
+                                           {'$set': {
+                                               'valid': False
+                                           }},
+                                           ))
+            continue
         except Exception as e:
             print(traceback.format_exc())
             errors_joining.append(link)
@@ -137,15 +164,29 @@ def join_discord(discord_email, discord_password, db):
 
         if update_obj:
             updates.append(update_obj)
-        time.sleep(60)
+        time.sleep(30)
 
     driver.close()
 
     joined_urls = db.discord_link
     joined_results = joined_urls.bulk_write(updates)
+    invalid_results = joined_urls.bulk_write(invalid_links)
     print(
         f"Joined {joined_results.modified_count} Discord servers!")
+    print(
+        f"{invalid_results.modified_count} invite links were invalid!")
     print(
         f"There were errors in joining {len(errors_joining)} servers.")
     print(
         f"Out of {joined_results.modified_count} servers, we were able to verify in {len(success_verifying)}")
+
+
+discord_email = os.environ.get('AIRFLOW_VAR_DISCORD_EMAIL')
+discord_password = os.environ.get('AIRFLOW_VAR_DISCORD_PASSWORD')
+MONGODB_URI = os.environ.get('AIRFLOW_VAR_MONGODB_URI')
+MONGODB_DATABASE = os.environ.get('AIRFLOW_VAR_MONGODB_DATABASE')
+
+mongo_client = MongoClient(MONGODB_URI)
+db = mongo_client[MONGODB_DATABASE]
+
+join_discord(discord_email, discord_password, db)

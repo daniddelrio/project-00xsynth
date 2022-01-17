@@ -2,6 +2,7 @@ import os
 import json
 import datetime
 import requests
+import traceback
 
 
 def track_watchlist(twitter_token, db):
@@ -11,29 +12,33 @@ def track_watchlist(twitter_token, db):
     timestamp = datetime.datetime.utcnow()
     for account in watchlist.find():
         account_id = account['account_id']
-        r = requests.get(f'https://api.twitter.com/2/users/{account_id}/tweets?tweet.fields=entities', headers={
-            'Authorization': f'Bearer {twitter_token}'})
+        try:
+            r = requests.get(f'https://api.twitter.com/2/users/{account_id}/tweets?tweet.fields=entities', headers={
+                'Authorization': f'Bearer {twitter_token}'})
 
-        tweets = r.json()['data']
+            if 'data' in r.json():
+                tweets = r.json()['data']
 
-        discord_urls = []
-        for tweet in tweets:
-            if 'entities' in tweet and 'urls' in tweet['entities']:
-                for url in tweet['entities']['urls']:
-                    if 'discord.gg' in url['display_url'] and url['display_url'] not in discord_urls:
-                        discord_urls.append(url['expanded_url'])
+                discord_urls = []
+                for tweet in tweets:
+                    if 'entities' in tweet and 'urls' in tweet['entities']:
+                        for url in tweet['entities']['urls']:
+                            if 'discord.gg' in url['display_url'] and url['display_url'] not in discord_urls:
+                                discord_urls.append(url['expanded_url'])
 
-        if len(discord_urls) > 0:
-            discord_urls = [{
-                'account_id': account['account_id'],
-                'url': url,
-                'joined': False,
-                'verified': False,
-                'created_at': timestamp
-            }
-                for url in discord_urls]
-            discord_links.extend(discord_urls)
-            newly_approved_old_ids.append(account['_id'])
+                if len(discord_urls) > 0:
+                    discord_urls = [{
+                        'account_id': account['account_id'],
+                        'url': url,
+                        'joined': False,
+                        'verified': False,
+                        'created_at': timestamp
+                    }
+                        for url in discord_urls]
+                    discord_links.extend(discord_urls)
+                    newly_approved_old_ids.append(account['_id'])
+        except Exception as e:
+            print(traceback.format_exc())
 
     # Move from watchlist to approved_accounts
     links_collection = db.discord_link
