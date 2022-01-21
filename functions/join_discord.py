@@ -27,8 +27,7 @@ def join_discord(discord_email, discord_password, db):
     driver = webdriver.Chrome(service=service, options=options)
 
     # Limiting the automation to a few entries at a time
-    discord_links = db.discord_link.find(
-        {"joined": False, "valid": True}).limit(10)
+    discord_links = db.discord_link.find({"joined": False, "valid": True}).limit(10)
     updates = []
     invalid_links = []
     errors_joining = []
@@ -38,35 +37,42 @@ def join_discord(discord_email, discord_password, db):
         able_to_join = True
         update_obj = None
         try:
-            driver.get(link['url'])
+            driver.get(link["url"])
             time.sleep(3)
-            invite_invalid_number = len(driver.find_elements(By.XPATH,
-                                                             "//*[contains(text(),'Invite Invalid')]"))
+            invite_invalid_number = len(
+                driver.find_elements(By.XPATH, "//*[contains(text(),'Invite Invalid')]")
+            )
 
             if invite_invalid_number > 0:
                 raise InvalidLinkException("Invite link is invalid!")
 
-            element_exists_number = len(driver.find_elements(By.XPATH,
-                                                             "//*[contains(text(),'Already have an account')]"))
+            element_exists_number = len(
+                driver.find_elements(
+                    By.XPATH, "//*[contains(text(),'Already have an account')]"
+                )
+            )
 
             # Check if the "have an account already" button exists. If it does, then log in with our credentials
-            if driver.execute_script("return (arguments[0] == 1)", element_exists_number):
+            if driver.execute_script(
+                "return (arguments[0] == 1)", element_exists_number
+            ):
                 driver.find_element(
-                    By.XPATH, "//*[contains(text(),'Already have an account')]").find_element(By.XPATH, "./..").click()
-                driver.find_element(
-                    By.NAME, "email").send_keys(discord_email)
+                    By.XPATH, "//*[contains(text(),'Already have an account')]"
+                ).find_element(By.XPATH, "./..").click()
+                driver.find_element(By.NAME, "email").send_keys(discord_email)
                 driver.find_element(By.CSS_SELECTOR, ".wrapper-1f5byN").click()
                 driver.find_element(By.NAME, "password").click()
-                driver.find_element(By.NAME, "password").send_keys(
-                    discord_password)
+                driver.find_element(By.NAME, "password").send_keys(discord_password)
                 driver.find_element(By.CSS_SELECTOR, ".button-1cRKG6").click()
             else:
-                found_accept_invite = len(driver.find_elements(
-                    By.XPATH, "//div[text()='Accept Invite']"))
+                found_accept_invite = len(
+                    driver.find_elements(By.XPATH, "//div[text()='Accept Invite']")
+                )
                 cap_while_loop = 0
                 while found_accept_invite == 0:
-                    found_accept_invite = len(driver.find_elements(
-                        By.XPATH, "//div[text()='Accept Invite']"))
+                    found_accept_invite = len(
+                        driver.find_elements(By.XPATH, "//div[text()='Accept Invite']")
+                    )
                     time.sleep(2)
                     cap_while_loop += 2
 
@@ -74,20 +80,21 @@ def join_discord(discord_email, discord_password, db):
                         break
 
                 driver.find_element(
-                    By.XPATH, "//div[text()='Accept Invite']").find_element(By.XPATH, "./..").click()
+                    By.XPATH, "//div[text()='Accept Invite']"
+                ).find_element(By.XPATH, "./..").click()
 
-            update_obj = UpdateOne({'_id': link['_id']},
-                                   {'$set': {
-                                       'joined': True
-                                   }},
-                                   )
+            update_obj = UpdateOne(
+                {"_id": link["_id"]},
+                {"$set": {"joined": True}},
+            )
         except InvalidLinkException as e:
             print(traceback.format_exc())
-            invalid_links.append(UpdateOne({'_id': link['_id']},
-                                           {'$set': {
-                                               'valid': False
-                                           }},
-                                           ))
+            invalid_links.append(
+                UpdateOne(
+                    {"_id": link["_id"]},
+                    {"$set": {"valid": False}},
+                )
+            )
             continue
         except Exception as e:
             print(traceback.format_exc())
@@ -99,20 +106,29 @@ def join_discord(discord_email, discord_password, db):
                 time.sleep(3)
 
                 # Clicking "Continue" for page on "Discord App Launched"
-                has_discord_app_launched = len(driver.find_elements(By.XPATH,
-                                                                    "//*[contains(text(),'Discord App Launched')]"))
-                if driver.execute_script("return (arguments[0] == 1)", has_discord_app_launched):
+                has_discord_app_launched = len(
+                    driver.find_elements(
+                        By.XPATH, "//*[contains(text(),'Discord App Launched')]"
+                    )
+                )
+                if driver.execute_script(
+                    "return (arguments[0] == 1)", has_discord_app_launched
+                ):
                     driver.find_element(
-                        By.XPATH, "//*[contains(text(),'Continue to Discord')]").find_element(By.XPATH, "./..").click()
+                        By.XPATH, "//*[contains(text(),'Continue to Discord')]"
+                    ).find_element(By.XPATH, "./..").click()
                     time.sleep(3)
 
                 time.sleep(7)
                 # Finding the channel that contains the word "verif" for "verify" or "verifications" or "rules"
                 found_channel = False
-                for channel in driver.find_elements(By.CSS_SELECTOR, ".mainContent-20q_Hp"):
+                for channel in driver.find_elements(
+                    By.CSS_SELECTOR, ".mainContent-20q_Hp"
+                ):
                     channel_name = channel.find_element(
-                        By.CSS_SELECTOR, ".channelName-3KPsGw").text
-                    if 'verif' in channel_name:
+                        By.CSS_SELECTOR, ".channelName-3KPsGw"
+                    ).text
+                    if "verif" in channel_name:
                         channel.click()
                         found_channel = True
                         break
@@ -122,42 +138,48 @@ def join_discord(discord_email, discord_password, db):
 
                 # Verifying by clicking the first five reactions on the message
                 time.sleep(4)
-                for count, reaction in enumerate(driver.find_elements(By.CLASS_NAME, "reaction-2A2y9y")):
+                for count, reaction in enumerate(
+                    driver.find_elements(By.CLASS_NAME, "reaction-2A2y9y")
+                ):
                     if count >= 5:
                         break
 
-                    reaction.find_element(
-                        By.CLASS_NAME, "reactionInner-9eVHJa").click()
+                    reaction.find_element(By.CLASS_NAME, "reactionInner-9eVHJa").click()
                     time.sleep(1.5)
 
                     # Just in case we need to agree to the rules and submit
-                    has_agree = len(driver.find_elements(By.CSS_SELECTOR,
-                                                         ".checkboxText-2F08go"))
+                    has_agree = len(
+                        driver.find_elements(By.CSS_SELECTOR, ".checkboxText-2F08go")
+                    )
                     if has_agree > 0:
-                        driver.find_element(By.CSS_SELECTOR,
-                                            ".checkboxText-2F08go").click()
-                        driver.find_element(By.CSS_SELECTOR,
-                                            ".submitButton-34IPxt").click()
+                        driver.find_element(
+                            By.CSS_SELECTOR, ".checkboxText-2F08go"
+                        ).click()
+                        driver.find_element(
+                            By.CSS_SELECTOR, ".submitButton-34IPxt"
+                        ).click()
                         time.sleep(1.5)
 
                 success_verifying.append(link)
-                update_obj = UpdateOne({'_id': link['_id']},
-                                       {'$set': {
-                                           'joined': True,
-                                           'verified': True
-                                       }},
-                                       )
+                update_obj = UpdateOne(
+                    {"_id": link["_id"]},
+                    {"$set": {"joined": True, "verified": True}},
+                )
 
                 # If necessary, go through steps to be able to talk by agreeing to the rules
-                has_submit_rules = len(driver.find_elements(By.CSS_SELECTOR,
-                                                            ".button-cO0-d9 > .contents-3ca1mk"))
-                if driver.execute_script("return (arguments[0] == 1)", has_submit_rules):
-                    driver.find_element(By.CSS_SELECTOR,
-                                        ".button-cO0-d9 > .contents-3ca1mk").click()
-                    driver.find_element(By.CSS_SELECTOR,
-                                        ".checkboxText-2F08go").click()
-                    driver.find_element(By.CSS_SELECTOR,
-                                        ".submitButton-34IPxt").click()
+                has_submit_rules = len(
+                    driver.find_elements(
+                        By.CSS_SELECTOR, ".button-cO0-d9 > .contents-3ca1mk"
+                    )
+                )
+                if driver.execute_script(
+                    "return (arguments[0] == 1)", has_submit_rules
+                ):
+                    driver.find_element(
+                        By.CSS_SELECTOR, ".button-cO0-d9 > .contents-3ca1mk"
+                    ).click()
+                    driver.find_element(By.CSS_SELECTOR, ".checkboxText-2F08go").click()
+                    driver.find_element(By.CSS_SELECTOR, ".submitButton-34IPxt").click()
 
             except Exception as e:
                 print(traceback.format_exc())
@@ -171,22 +193,9 @@ def join_discord(discord_email, discord_password, db):
     joined_urls = db.discord_link
     joined_results = joined_urls.bulk_write(updates)
     invalid_results = joined_urls.bulk_write(invalid_links)
+    print(f"Joined {joined_results.modified_count} Discord servers!")
+    print(f"{invalid_results.modified_count} invite links were invalid!")
+    print(f"There were errors in joining {len(errors_joining)} servers.")
     print(
-        f"Joined {joined_results.modified_count} Discord servers!")
-    print(
-        f"{invalid_results.modified_count} invite links were invalid!")
-    print(
-        f"There were errors in joining {len(errors_joining)} servers.")
-    print(
-        f"Out of {joined_results.modified_count} servers, we were able to verify in {len(success_verifying)}")
-
-
-discord_email = os.environ.get('AIRFLOW_VAR_DISCORD_EMAIL')
-discord_password = os.environ.get('AIRFLOW_VAR_DISCORD_PASSWORD')
-MONGODB_URI = os.environ.get('AIRFLOW_VAR_MONGODB_URI')
-MONGODB_DATABASE = os.environ.get('AIRFLOW_VAR_MONGODB_DATABASE')
-
-mongo_client = MongoClient(MONGODB_URI)
-db = mongo_client[MONGODB_DATABASE]
-
-join_discord(discord_email, discord_password, db)
+        f"Out of {joined_results.modified_count} servers, we were able to verify in {len(success_verifying)}"
+    )
