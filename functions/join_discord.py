@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-import os
+import datetime
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
@@ -30,6 +30,8 @@ def join_discord(discord_email, discord_password, db):
     discord_links = db.discord_link.find({"joined": False, "valid": True}).limit(10)
     updates = []
     invalid_links = []
+    new_watchlist = []
+    old_approved = []
     errors_joining = []
     success_verifying = []
 
@@ -95,6 +97,22 @@ def join_discord(discord_email, discord_password, db):
                     {"$set": {"valid": False}},
                 )
             )
+            timestamp = datetime.datetime.utcnow()
+
+            old_approved.append(link["account_id"])
+            new_watchlist.append(
+                UpdateOne(
+                    {"account_id": link["account_id"]},
+                    {
+                        "$setOnInsert": {
+                            "account_id": link["account_id"],
+                            "timestamp": timestamp,
+                        }
+                    },
+                    upsert=True,
+                )
+            )
+
             continue
         except Exception as e:
             print(traceback.format_exc())
@@ -191,10 +209,18 @@ def join_discord(discord_email, discord_password, db):
     driver.close()
 
     joined_urls = db.discord_link
+    approved_accounts = db.approved_accounts
+    watchlist = db.watchlist
+    approved_accounts_deletion = approved_accounts.delete_many(
+        {"account_id": {"$in": old_approved}}
+    )
+    watchlist_addition = watchlist.bulk_write(new_watchlist)
     joined_results = joined_urls.bulk_write(updates)
     invalid_results = joined_urls.bulk_write(invalid_links)
     print(f"Joined {joined_results.modified_count} Discord servers!")
-    print(f"{invalid_results.modified_count} invite links were invalid!")
+    print(
+        f"{invalid_results.modified_count} invite links were invalid! They've been moved to the watchlist."
+    )
     print(f"There were errors in joining {len(errors_joining)} servers.")
     print(
         f"Out of {joined_results.modified_count} servers, we were able to verify in {len(success_verifying)}"
