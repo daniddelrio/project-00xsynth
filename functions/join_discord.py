@@ -8,13 +8,22 @@ from selenium.webdriver.common.by import By
 import time
 from pymongo import UpdateOne
 import traceback
+import os
 
 
 class InvalidLinkException(Exception):
     pass
 
 
-def join_discord(discord_email, discord_password, db):
+def handler(event, context):
+    MONGODB_URI = os.environ.get("MONGODB_URI")
+    MONGODB_DATABASE = os.environ.get("MONGODB_DATABASE")
+    DISCORD_EMAIL = os.environ.get("DISCORD_EMAIL")
+    DISCORD_PASSWORD = os.environ.get("DISCORD_PASSWORD")
+
+    mongo_client = MongoClient(MONGODB_URI)
+    db = mongo_client[MONGODB_DATABASE]
+
     # Use the `install()` method to set `executabe_path` in a new `Service` instance:
     service = Service(executable_path=ChromeDriverManager().install())
 
@@ -61,10 +70,10 @@ def join_discord(discord_email, discord_password, db):
                 driver.find_element(
                     By.XPATH, "//*[contains(text(),'Already have an account')]"
                 ).find_element(By.XPATH, "./..").click()
-                driver.find_element(By.NAME, "email").send_keys(discord_email)
+                driver.find_element(By.NAME, "email").send_keys(DISCORD_EMAIL)
                 driver.find_element(By.CSS_SELECTOR, ".wrapper-1f5byN").click()
                 driver.find_element(By.NAME, "password").click()
-                driver.find_element(By.NAME, "password").send_keys(discord_password)
+                driver.find_element(By.NAME, "password").send_keys(DISCORD_PASSWORD)
                 driver.find_element(By.CSS_SELECTOR, ".button-1cRKG6").click()
             else:
                 found_accept_invite = len(

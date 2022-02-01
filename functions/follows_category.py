@@ -1,9 +1,17 @@
 import datetime
 from pymongo import UpdateOne
 import traceback
+from pymongo import MongoClient
+import os
 
 
-def categorize_follows(db):
+def handler(event, context):
+    MONGODB_URI = os.environ.get("MONGODB_URI")
+    MONGODB_DATABASE = os.environ.get("MONGODB_DATABASE")
+
+    mongo_client = MongoClient(MONGODB_URI)
+    db = mongo_client[MONGODB_DATABASE]
+
     timestamp = datetime.datetime.utcnow()
     data = db.temp_followed
 
@@ -12,46 +20,62 @@ def categorize_follows(db):
 
     for account in data.find():
         discord_urls = []
-        if 'entities' not in account:
+        if "entities" not in account:
             continue
 
-        entities = account['entities']
+        entities = account["entities"]
 
         try:
 
-            if 'url' in entities and 'urls' in entities['url']:
-                for url in entities['url']['urls']:
-                    if 'discord.gg' in url['display_url'] and url['expanded_url'] not in discord_urls:
-                        discord_urls.append(url['expanded_url'])
+            if "url" in entities and "urls" in entities["url"]:
+                for url in entities["url"]["urls"]:
+                    if (
+                        "discord.gg" in url["display_url"]
+                        and url["expanded_url"] not in discord_urls
+                    ):
+                        discord_urls.append(url["expanded_url"])
 
-            if 'description' in entities and 'urls' in entities['description']:
-                for url in entities['description']['urls']:
-                    if 'discord.gg' in url['display_url'] and url['expanded_url'] not in discord_urls and url['display_url'] != 'discord.gg':
-                        discord_urls.append(url['expanded_url'])
+            if "description" in entities and "urls" in entities["description"]:
+                for url in entities["description"]["urls"]:
+                    if (
+                        "discord.gg" in url["display_url"]
+                        and url["expanded_url"] not in discord_urls
+                        and url["display_url"] != "discord.gg"
+                    ):
+                        discord_urls.append(url["expanded_url"])
 
             if len(discord_urls) > 0:
-                discord_urls = [UpdateOne(
-                                {'url': url},
-                                {"$setOnInsert": {
-                                    'account_id': account['id'],
-                                    'url': url,
-                                    'joined': False,
-                                    'verified': False,
-                                    'valid': True,
-                                    'created_at': timestamp
-                                }},
-                                upsert=True)
-                                for url in discord_urls]
+                discord_urls = [
+                    UpdateOne(
+                        {"url": url},
+                        {
+                            "$setOnInsert": {
+                                "account_id": account["id"],
+                                "url": url,
+                                "joined": False,
+                                "verified": False,
+                                "valid": True,
+                                "created_at": timestamp,
+                            }
+                        },
+                        upsert=True,
+                    )
+                    for url in discord_urls
+                ]
                 discord_links.extend(discord_urls)
             else:
                 watchlist.append(
-                    UpdateOne({'account_id': account['id']},
-                              {'$setOnInsert': {
-                                  'account_id': account['id'],
-                                  'timestamp': timestamp,
-                              }},
-                              upsert=True
-                              ))
+                    UpdateOne(
+                        {"account_id": account["id"]},
+                        {
+                            "$setOnInsert": {
+                                "account_id": account["id"],
+                                "timestamp": timestamp,
+                            }
+                        },
+                        upsert=True,
+                    )
+                )
         except:
             print(traceback.format_exc())
 
@@ -61,7 +85,6 @@ def categorize_follows(db):
 
     links_collection = db.discord_link
     discord_results = links_collection.bulk_write(discord_links)
-    print(
-        f"Added {discord_results.upserted_count} entries to discord_link!")
+    print(f"Added {discord_results.upserted_count} entries to discord_link!")
 
     data.drop()
