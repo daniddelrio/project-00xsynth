@@ -4,6 +4,9 @@ import datetime
 import requests
 import traceback
 from pymongo import MongoClient
+from custom_logger import setup_logger
+
+logger = setup_logger("track_watchlist")
 
 
 def handler(event, context):
@@ -11,8 +14,12 @@ def handler(event, context):
     MONGODB_DATABASE = os.environ.get("MONGODB_DATABASE")
     TWITTER_BEARER_TOKEN = os.environ.get("TWITTER_BEARER_TOKEN")
 
-    mongo_client = MongoClient(MONGODB_URI)
-    db = mongo_client[MONGODB_DATABASE]
+    try:
+        mongo_client = MongoClient(MONGODB_URI)
+        db = mongo_client[MONGODB_DATABASE]
+    except Exception:
+        logger.error("Could not connect to MongoDB database")
+        return None
 
     watchlist = db.watchlist
     discord_links = []
@@ -40,6 +47,7 @@ def handler(event, context):
                                 discord_urls.append(url["expanded_url"])
 
                 if len(discord_urls) > 0:
+                    logger.info(f"Found Discord URLs for user {account_id}")
                     discord_urls = [
                         {
                             "account_id": account["account_id"],
@@ -53,12 +61,27 @@ def handler(event, context):
                     discord_links.extend(discord_urls)
                     newly_approved_old_ids.append(account["_id"])
         except Exception as e:
-            print(traceback.format_exc())
+            logger.error(f"There was an error in tracking user {account_id}")
+            # print(traceback.format_exc())
 
     # Move from watchlist to approved_accounts
-    links_collection = db.discord_link
-    discord_results = links_collection.insert_many(discord_links)
-    print(f"Added {len(discord_results.inserted_ids)} new entries to discord_link!")
+    try:
+        links_collection = db.discord_link
+        discord_results = links_collection.insert_many(discord_links)
+        logger.info(
+            f"Added {len(discord_results.inserted_ids)} new entries to discord_link!"
+        )
+    except Exception:
+        logger.error(f"Error in adding {len(discord_links)} entries to discord_link!")
+        return None
 
-    watchlist_deletion = watchlist.delete_many({"_id": {"$in": newly_approved_old_ids}})
-    print(newly_approved_old_ids)
+    try:
+        watchlist_deletion = watchlist.delete_many(
+            {"_id": {"$in": newly_approved_old_ids}}
+        )
+        logger.info(f"Deleted {len(newly_approved_old_ids)} entries from watchlist!")
+    except Exception:
+        logger.error(
+            f"Error in deleting {len(newly_approved_old_ids)} entries from watchlist!"
+        )
+        return None

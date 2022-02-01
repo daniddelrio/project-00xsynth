@@ -4,12 +4,14 @@ import requests
 from pymongo import MongoClient
 import traceback
 from dotenv import load_dotenv
+from custom_logger import setup_logger
 
-load_dotenv()
+logger = setup_logger("add_username")
 
 
 def handler(event, context):
     if "Username" not in event:
+        logger.error(f"No username was given.")
         return None
 
     MONGODB_URI = os.environ.get("MONGODB_URI")
@@ -40,11 +42,13 @@ def handler(event, context):
             inputs = db.input
             inserted_id = inputs.insert_one(input).inserted_id
 
-            print("Created: " + str(inserted_id))
+            logger.info(
+                f"Created user with username {username}, now with ID {str(inserted_id)}"
+            )
+            return {"id": inserted_id, "username": username}
         else:
-            print(f"Could not find user @{username}")
+            logger.info(f"Could not find user @{username}")
+            return None
     except:
-        print(traceback.format_exc())
+        logger.error("An error occurred while adding the username.")
         return None
-
-    return input

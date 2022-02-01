@@ -9,9 +9,16 @@ import time
 from pymongo import UpdateOne
 import traceback
 import os
+from custom_logger import setup_logger
+
+logger = setup_logger("join_discord")
 
 
 class InvalidLinkException(Exception):
+    pass
+
+
+class NoVerifyChannelException(Exception):
     pass
 
 
@@ -21,8 +28,14 @@ def handler(event, context):
     DISCORD_EMAIL = os.environ.get("DISCORD_EMAIL")
     DISCORD_PASSWORD = os.environ.get("DISCORD_PASSWORD")
 
-    mongo_client = MongoClient(MONGODB_URI)
-    db = mongo_client[MONGODB_DATABASE]
+    limit = event.get("Limit", 10)
+
+    try:
+        mongo_client = MongoClient(MONGODB_URI)
+        db = mongo_client[MONGODB_DATABASE]
+    except Exception:
+        logger.error("Could not connect to MongoDB database")
+        return None
 
     # Use the `install()` method to set `executabe_path` in a new `Service` instance:
     service = Service(executable_path=ChromeDriverManager().install())
@@ -36,7 +49,7 @@ def handler(event, context):
     driver = webdriver.Chrome(service=service, options=options)
 
     # Limiting the automation to a few entries at a time
-    discord_links = db.discord_link.find({"joined": False, "valid": True}).limit(10)
+    discord_links = db.discord_link.find({"joined": False, "valid": True}).limit(limit)
     updates = []
     invalid_links = []
     new_watchlist = []
@@ -47,6 +60,8 @@ def handler(event, context):
     for link in discord_links:
         able_to_join = True
         update_obj = None
+        url = link["url"]
+        id = link["_id"]
         try:
             driver.get(link["url"])
             time.sleep(3)
@@ -94,12 +109,14 @@ def handler(event, context):
                     By.XPATH, "//div[text()='Accept Invite']"
                 ).find_element(By.XPATH, "./..").click()
 
+            logger.info(f"Joined invite from {url} (id {id})")
             update_obj = UpdateOne(
                 {"_id": link["_id"]},
                 {"$set": {"joined": True}},
             )
         except InvalidLinkException as e:
-            print(traceback.format_exc())
+            logger.warning(f"Invalid invite from {url} (id {id})")
+            # print(traceback.format_exc())
             invalid_links.append(
                 UpdateOne(
                     {"_id": link["_id"]},
@@ -124,7 +141,8 @@ def handler(event, context):
 
             continue
         except Exception as e:
-            print(traceback.format_exc())
+            logger.error(f"Error in trying to join {url} (id {id})")
+            # print(traceback.format_exc())
             errors_joining.append(link)
             able_to_join = False
 
@@ -156,12 +174,15 @@ def handler(event, context):
                         By.CSS_SELECTOR, ".channelName-3KPsGw"
                     ).text
                     if "verif" in channel_name:
+                        logger.info(f"Found channel {channel_name} in {url} (id {id})")
                         channel.click()
                         found_channel = True
                         break
 
                 if not found_channel:
-                    raise Exception("Was not able to find the verify channel")
+                    raise NoVerifyChannelException(
+                        "Was not able to find the verify channel"
+                    )
 
                 # Verifying by clicking the first five reactions on the message
                 time.sleep(4)
@@ -171,6 +192,7 @@ def handler(event, context):
                     if count >= 5:
                         break
 
+                    logger.info(f"Reacting #{count+1} in {url} (id {id})")
                     reaction.find_element(By.CLASS_NAME, "reactionInner-9eVHJa").click()
                     time.sleep(1.5)
 
@@ -185,6 +207,9 @@ def handler(event, context):
                         driver.find_element(
                             By.CSS_SELECTOR, ".submitButton-34IPxt"
                         ).click()
+                        logger.info(
+                            f"Agreed to rules before reacting in {url} (id {id})"
+                        )
                         time.sleep(1.5)
 
                 success_verifying.append(link)
@@ -207,9 +232,13 @@ def handler(event, context):
                     ).click()
                     driver.find_element(By.CSS_SELECTOR, ".checkboxText-2F08go").click()
                     driver.find_element(By.CSS_SELECTOR, ".submitButton-34IPxt").click()
+                    logger.info(f"Agreed to rules in {url} (id {id})")
 
+            except NoVerifyChannelException:
+                logger.error(f"No verify channel found in {url} (id {id})")
             except Exception as e:
-                print(traceback.format_exc())
+                logger.error(f"Error in attempting to verify in {url} (id {id})")
+                # print(traceback.format_exc())
 
         if update_obj:
             updates.append(update_obj)
@@ -218,19 +247,30 @@ def handler(event, context):
     driver.close()
 
     joined_urls = db.discord_link
-    approved_accounts = db.approved_accounts
     watchlist = db.watchlist
-    approved_accounts_deletion = approved_accounts.delete_many(
-        {"account_id": {"$in": old_approved}}
-    )
-    watchlist_addition = watchlist.bulk_write(new_watchlist)
-    joined_results = joined_urls.bulk_write(updates)
-    invalid_results = joined_urls.bulk_write(invalid_links)
-    print(f"Joined {joined_results.modified_count} Discord servers!")
-    print(
-        f"{invalid_results.modified_count} invite links were invalid! They've been moved to the watchlist."
-    )
-    print(f"There were errors in joining {len(errors_joining)} servers.")
-    print(
-        f"Out of {joined_results.modified_count} servers, we were able to verify in {len(success_verifying)}"
-    )
+
+    try:
+        watchlist_addition = watchlist.bulk_write(new_watchlist)
+        invalid_results = joined_urls.bulk_write(invalid_links)
+        logger.info(
+            f"{invalid_results.modified_count} invite links were invalid! {watchlist_addition.inserted_count} have been added back to the watchlist."
+        )
+    except Exception:
+        logger.error(
+            f"Error in adding {len(new_watchlist)} entries to the watchlist and marking as invalid {len(invalid_links)} entries!"
+        )
+        return None
+
+    try:
+        joined_results = joined_urls.bulk_write(updates)
+        logger.info(f"Joined {joined_results.modified_count} Discord servers!")
+
+        logger.info(f"There were errors in joining {len(errors_joining)} servers.")
+        logger.info(
+            f"Out of {joined_results.modified_count} servers, we were able to verify in {len(success_verifying)}"
+        )
+    except Exception:
+        logger.error(f"Error in marking {len(updates)} entries as joined.")
+        return None
+
+    return "Success"

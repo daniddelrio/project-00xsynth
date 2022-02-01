@@ -3,6 +3,9 @@ from pymongo import UpdateOne
 import traceback
 from pymongo import MongoClient
 import os
+from custom_logger import setup_logger
+
+logger = setup_logger("scrape_follows")
 
 
 def handler(event, context):
@@ -10,8 +13,12 @@ def handler(event, context):
     MONGODB_DATABASE = os.environ.get("MONGODB_DATABASE")
     TWITTER_BEARER_TOKEN = os.environ.get("TWITTER_BEARER_TOKEN")
 
-    mongo_client = MongoClient(MONGODB_URI)
-    db = mongo_client[MONGODB_DATABASE]
+    try:
+        mongo_client = MongoClient(MONGODB_URI)
+        db = mongo_client[MONGODB_DATABASE]
+    except Exception:
+        logger.error("Could not connect to MongoDB database")
+        return None
 
     inputs = db.input
     followed_accounts = []
@@ -31,6 +38,7 @@ def handler(event, context):
                     )
                     res = r.json()
                     if "data" in res:
+                        data_len = len(res["data"])
                         followed_accounts.extend(
                             [
                                 UpdateOne(
@@ -40,6 +48,9 @@ def handler(event, context):
                                 )
                                 for follow in res["data"]
                             ]
+                        )
+                        logger.info(
+                            f"Adding {data_len} accounts who follow user {account_id} to temp_follows"
                         )
                 else:
                     # RATE LIMIT: 15 requests / 15 minutes
@@ -57,17 +68,21 @@ def handler(event, context):
 
                         res = r.json()
                         next_token = res["next_token"] if "next_token" in res else None
-                        # followed_accounts.extend(res['data'])
-                        followed_accounts.extend(
-                            [
-                                UpdateOne(
-                                    {"id": follow["id"]},
-                                    {"$setOnInsert": follow},
-                                    upsert=True,
-                                )
-                                for follow in res["data"]
-                            ]
-                        )
+                        if "data" in res:
+                            data_len = len(res["data"])
+                            logger.info(
+                                f"Adding {data_len} more accounts who follow user {account_id} to temp_follows"
+                            )
+                            followed_accounts.extend(
+                                [
+                                    UpdateOne(
+                                        {"id": follow["id"]},
+                                        {"$setOnInsert": follow},
+                                        upsert=True,
+                                    )
+                                    for follow in res["data"]
+                                ]
+                            )
 
                     updated_accounts.append(
                         UpdateOne(
@@ -80,11 +95,30 @@ def handler(event, context):
                         )
                     )
             except:
-                print(traceback.format_exc())
+                logger.error(
+                    "There was an error in scraping the following of user {account_id}"
+                )
+                # print(traceback.format_exc())
 
-    temp_follows = db.temp_followed
-    followed_results = temp_follows.bulk_write(followed_accounts)
-    print(f"Added {followed_results.upserted_count} entries to temp_followed!")
+    try:
+        temp_follows = db.temp_followed
+        followed_results = temp_follows.bulk_write(followed_accounts)
+        logger.info(
+            f"Added {followed_results.upserted_count} total entries to temp_followed!"
+        )
+    except Exception:
+        logger.error(
+            f"Error in adding {len(followed_accounts)} entries to temp_followed!"
+        )
+        return None
 
     if len(updated_accounts) > 0:
-        db.input.bulk_write(updated_accounts)
+        try:
+            db.input.bulk_write(updated_accounts)
+        except Exception:
+            logger.error(
+                f"Error in updating {len(updated_accounts)} entries in the inputs collection."
+            )
+            return None
+
+    return "Success"

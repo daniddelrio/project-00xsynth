@@ -3,14 +3,21 @@ from pymongo import UpdateOne
 import traceback
 from pymongo import MongoClient
 import os
+from custom_logger import setup_logger
+
+logger = setup_logger("follows_category")
 
 
 def handler(event, context):
     MONGODB_URI = os.environ.get("MONGODB_URI")
     MONGODB_DATABASE = os.environ.get("MONGODB_DATABASE")
 
-    mongo_client = MongoClient(MONGODB_URI)
-    db = mongo_client[MONGODB_DATABASE]
+    try:
+        mongo_client = MongoClient(MONGODB_URI)
+        db = mongo_client[MONGODB_DATABASE]
+    except Exception:
+        logger.error("Could not connect to MongoDB database")
+        return None
 
     timestamp = datetime.datetime.utcnow()
     data = db.temp_followed
@@ -24,9 +31,9 @@ def handler(event, context):
             continue
 
         entities = account["entities"]
+        account_id = account["id"]
 
         try:
-
             if "url" in entities and "urls" in entities["url"]:
                 for url in entities["url"]["urls"]:
                     if (
@@ -45,6 +52,7 @@ def handler(event, context):
                         discord_urls.append(url["expanded_url"])
 
             if len(discord_urls) > 0:
+                logger.info(f"Found Discord URLs for user {account_id}")
                 discord_urls = [
                     UpdateOne(
                         {"url": url},
@@ -64,6 +72,7 @@ def handler(event, context):
                 ]
                 discord_links.extend(discord_urls)
             else:
+                logger.info(f"Added user {account_id} to watchlist")
                 watchlist.append(
                     UpdateOne(
                         {"account_id": account["id"]},
@@ -76,15 +85,43 @@ def handler(event, context):
                         upsert=True,
                     )
                 )
-        except:
-            print(traceback.format_exc())
+        except Exception:
+            logger.error(f"There was an error in categorizing user {account_id}")
 
-    watchlist_collection = db.watchlist
-    watchlist_results = watchlist_collection.bulk_write(watchlist)
-    print(f"Added {watchlist_results.upserted_count} entries to watchlist!")
+    try:
+        if len(watchlist) > 0:
+            watchlist_collection = db.watchlist
+            watchlist_results = watchlist_collection.bulk_write(watchlist)
+            logger.info(
+                f"Added {watchlist_results.upserted_count} entries to watchlist!"
+            )
+        else:
+            logger.warning(f"No entries were added entries to watchlist.")
+    except Exception:
+        logger.error(f"Error in adding {len(watchlist)} entries to watchlist!")
+        return None
 
-    links_collection = db.discord_link
-    discord_results = links_collection.bulk_write(discord_links)
-    print(f"Added {discord_results.upserted_count} entries to discord_link!")
+    try:
+        if len(discord_links) > 0:
+            links_collection = db.discord_link
+            discord_results = links_collection.bulk_write(discord_links)
+            logger.info(
+                f"Added {discord_results.upserted_count} entries to discord_link!"
+            )
+        else:
+            logger.warning(f"No entries were added entries to discord_link.")
+    except Exception:
+        logger.error(f"Error in adding {len(discord_links)} entries to discord_link!")
+        return None
 
-    data.drop()
+    try:
+        logger.info(
+            f"Removing the {data.estimated_document_count()} entries in temp_followed"
+        )
+        data.drop()
+        return "Success"
+    except Exception:
+        logger.error(
+            f"There was an error in removing the {data.estimated_document_count()} entries from temp_followed!"
+        )
+        return None

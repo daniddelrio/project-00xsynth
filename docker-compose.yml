@@ -1,0 +1,57 @@
+version: "3.9"
+   
+services:
+  follows_category:
+    build:
+      context: .
+      args:
+      - FUNCTION_NAME=follows_category
+    env_file:
+      - .env
+    ports:
+      - 9000:8080
+  scrape_follows:
+    build:
+      context: .
+      args:
+      - FUNCTION_NAME=scrape_follows
+    env_file:
+      - .env
+    ports:
+      - 9001:8080
+  scrape_liked:
+    build:
+      context: .
+      args:
+      - FUNCTION_NAME=scrape_liked
+    env_file:
+      - .env
+    ports:
+      - 9002:8080
+  track_watchlist:
+    build:
+      context: .
+      args:
+      - FUNCTION_NAME=track_watchlist
+    env_file:
+      - .env
+    ports:
+      - 9003:8080
+  add_username:
+    build:
+      context: .
+      args:
+      - FUNCTION_NAME=add_username
+    env_file:
+      - .env
+    ports:
+      - 9004:8080
+  join_discord:
+    build:
+      context: .
+      args:
+      - FUNCTION_NAME=join_discord
+    env_file:
+      - .env
+    ports:
+      - 9005:8080
