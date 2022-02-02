@@ -2,6 +2,7 @@ version: "3.9"
    
 services:
   follows_category:
+    image: 357518498432.dkr.ecr.ap-southeast-1.amazonaws.com/follows-category
     build:
       context: .
       args:
@@ -11,6 +12,7 @@ services:
     ports:
       - 9000:8080
   scrape_follows:
+    image: 357518498432.dkr.ecr.ap-southeast-1.amazonaws.com/scrape_follows
     build:
       context: .
       args:
@@ -20,6 +22,7 @@ services:
     ports:
       - 9001:8080
   scrape_liked:
+    image: 357518498432.dkr.ecr.ap-southeast-1.amazonaws.com/scrape_liked
     build:
       context: .
       args:
@@ -29,6 +32,7 @@ services:
     ports:
       - 9002:8080
   track_watchlist:
+    image: 357518498432.dkr.ecr.ap-southeast-1.amazonaws.com/track_watchlist
     build:
       context: .
       args:
@@ -38,6 +42,7 @@ services:
     ports:
       - 9003:8080
   add_username:
+    image: 357518498432.dkr.ecr.ap-southeast-1.amazonaws.com/add_username
     build:
       context: .
       args:
@@ -47,6 +52,7 @@ services:
     ports:
       - 9004:8080
   join_discord:
+    image: 357518498432.dkr.ecr.ap-southeast-1.amazonaws.com/join_discord
     build:
       context: .
       args:

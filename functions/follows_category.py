@@ -3,22 +3,13 @@ from pymongo import UpdateOne
 import traceback
 from pymongo import MongoClient
 import os
-from custom_logger import setup_logger
+from utils.custom_logger import setup_logger
+from utils.mongo_client import db
 
 logger = setup_logger("follows_category")
 
 
 def handler(event, context):
-    MONGODB_URI = os.environ.get("MONGODB_URI")
-    MONGODB_DATABASE = os.environ.get("MONGODB_DATABASE")
-
-    try:
-        mongo_client = MongoClient(MONGODB_URI)
-        db = mongo_client[MONGODB_DATABASE]
-    except Exception:
-        logger.error("Could not connect to MongoDB database")
-        return None
-
     timestamp = datetime.datetime.utcnow()
     data = db.temp_followed
 

@@ -4,22 +4,14 @@ import datetime
 import requests
 import traceback
 from pymongo import MongoClient
-from custom_logger import setup_logger
+from utils.custom_logger import setup_logger
+from utils.mongo_client import db
 
 logger = setup_logger("track_watchlist")
 
 
 def handler(event, context):
-    MONGODB_URI = os.environ.get("MONGODB_URI")
-    MONGODB_DATABASE = os.environ.get("MONGODB_DATABASE")
     TWITTER_BEARER_TOKEN = os.environ.get("TWITTER_BEARER_TOKEN")
-
-    try:
-        mongo_client = MongoClient(MONGODB_URI)
-        db = mongo_client[MONGODB_DATABASE]
-    except Exception:
-        logger.error("Could not connect to MongoDB database")
-        return None
 
     watchlist = db.watchlist
     discord_links = []

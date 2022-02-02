@@ -9,7 +9,8 @@ import time
 from pymongo import UpdateOne
 import traceback
 import os
-from custom_logger import setup_logger
+from utils.custom_logger import setup_logger
+from utils.mongo_client import db
 
 logger = setup_logger("join_discord")
 
@@ -23,19 +24,10 @@ class NoVerifyChannelException(Exception):
 
 
 def handler(event, context):
-    MONGODB_URI = os.environ.get("MONGODB_URI")
-    MONGODB_DATABASE = os.environ.get("MONGODB_DATABASE")
     DISCORD_EMAIL = os.environ.get("DISCORD_EMAIL")
     DISCORD_PASSWORD = os.environ.get("DISCORD_PASSWORD")
 
     limit = event.get("Limit", 10)
-
-    try:
-        mongo_client = MongoClient(MONGODB_URI)
-        db = mongo_client[MONGODB_DATABASE]
-    except Exception:
-        logger.error("Could not connect to MongoDB database")
-        return None
 
     # Use the `install()` method to set `executabe_path` in a new `Service` instance:
     service = Service(executable_path=ChromeDriverManager().install())

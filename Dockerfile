@@ -5,7 +5,7 @@ ARG FUNCTION_HANDLER
 
 # Copy function code
 COPY functions/${FUNCTION_NAME}.py ${LAMBDA_TASK_ROOT}/app.py
-COPY functions/custom_logger.py ${LAMBDA_TASK_ROOT}
+COPY functions/utils ${LAMBDA_TASK_ROOT}/utils
 
 # Install the function's dependencies using file requirements.txt
 # from your project folder.

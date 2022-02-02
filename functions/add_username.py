@@ -4,7 +4,8 @@ import requests
 from pymongo import MongoClient
 import traceback
 from dotenv import load_dotenv
-from custom_logger import setup_logger
+from utils.custom_logger import setup_logger
+from utils.mongo_client import db
 
 logger = setup_logger("add_username")
 
@@ -14,12 +15,7 @@ def handler(event, context):
         logger.error(f"No username was given.")
         return None
 
-    MONGODB_URI = os.environ.get("MONGODB_URI")
-    MONGODB_DATABASE = os.environ.get("MONGODB_DATABASE")
     TWITTER_BEARER_TOKEN = os.environ.get("TWITTER_BEARER_TOKEN")
-
-    mongo_client = MongoClient(MONGODB_URI)
-    db = mongo_client[MONGODB_DATABASE]
 
     username = event["Username"]
 

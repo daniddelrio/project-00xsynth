@@ -1,4 +1,5 @@
 .DS_Store
+rootkey.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
