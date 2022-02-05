@@ -41,7 +41,7 @@ def handler(event, context):
             logger.info(
                 f"Created user with username {username}, now with ID {str(inserted_id)}"
             )
-            return {"id": inserted_id, "username": username}
+            return {"id": str(inserted_id), "username": username}
         else:
             logger.info(f"Could not find user @{username}")
             return None
