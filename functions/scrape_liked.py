@@ -17,6 +17,7 @@ def handler(event, context):
     # Put all scraped followed accts into one temp collection.
     for input in inputs.find():
         account_id = input["account_id"]
+        username = input["username"]
         if account_id:
             try:
                 r = requests.get(
@@ -33,7 +34,7 @@ def handler(event, context):
                         [
                             UpdateOne(
                                 {"id": follow["id"]},
-                                {"$setOnInsert": follow},
+                                {"$setOnInsert": {**follow, 'type': 'like', 'input': username}},
                                 upsert=True,
                             )
                             for follow in res["includes"]["users"]

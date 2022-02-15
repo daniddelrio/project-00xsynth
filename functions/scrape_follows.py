@@ -17,6 +17,7 @@ def handler(event, context):
     # Put all scraped followed accts into one temp collection.
     for input in inputs.find():
         account_id = input["account_id"]
+        username = input["username"]
         if account_id:
             try:
                 # If it's already been scraped before, then we can just get the last 15 followed accounts of the person
@@ -34,7 +35,7 @@ def handler(event, context):
                             [
                                 UpdateOne(
                                     {"id": follow["id"]},
-                                    {"$setOnInsert": follow},
+                                    {"$setOnInsert": {**follow, 'type': 'follow', 'input': username}},
                                     upsert=True,
                                 )
                                 for follow in res["data"]
@@ -68,7 +69,7 @@ def handler(event, context):
                                 [
                                     UpdateOne(
                                         {"id": follow["id"]},
-                                        {"$setOnInsert": follow},
+                                        {"$setOnInsert": {**follow, 'type': 'follow', 'input': username}},
                                         upsert=True,
                                     )
                                     for follow in res["data"]

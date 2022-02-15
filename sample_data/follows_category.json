@@ -6,6 +6,8 @@
       "id": "1413246741269389316",
       "description": "We have arrived. \nWebsite: https://t.co/n2kZx7lBFU\nGet in touch @ contact@county.capital",
       "username": "County_Cap",
+      "type": "like",
+      "input": "DCreaturesDAO",
       "entities": {
         "description": {
           "urls": [
@@ -26,6 +28,8 @@
       "id": "784068635958644736",
       "description": "DeFi Enthusiast | NFT Enthusiast | @3rdStCapital | Member of @County_Cap | Member of TIC | Leaker of Alpha for the masses",
       "username": "cryptodetweiler",
+      "type": "follow",
+      "input": "DCreaturesDAO",
       "entities": {
         "description": {
           "mentions": [

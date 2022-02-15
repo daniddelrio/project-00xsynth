@@ -2,4 +2,5 @@ requests==2.25.1
 python-dotenv==0.19.2
 pymongo[srv]
 selenium==4.1.0
+telegram-send==0.25
 webdriver-manager==3.5.2
