@@ -10,7 +10,6 @@ logger = setup_logger("tg_send")
 def handler(event, context):
     data = db.temp_followed
     all_messages = []
-    telegram_send.send(messages=["test"], conf=config_path)
 
     for account in data.find():
         account_id = account['id']
@@ -40,5 +39,7 @@ def handler(event, context):
       logger.info(
           f"Sent {len(all_messages)} messages on Telegram!"
       )
+      return "Success"
     except Exception:
       logger.error(f"Error in sending {len(all_messages)} messages on Telegram!")
+      return None

@@ -61,3 +61,13 @@ services:
       - .env
     ports:
       - 9005:8080
+  tg_send:
+    image: 357518498432.dkr.ecr.ap-southeast-1.amazonaws.com/tg_send
+    build:
+      context: .
+      args:
+      - FUNCTION_NAME=tg_send
+    env_file:
+      - .env
+    ports:
+      - 9006:8080
