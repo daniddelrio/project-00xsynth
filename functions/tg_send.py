@@ -65,5 +65,3 @@ def handler(event, context):
     except Exception:
       logger.error(f"Error in sending {len(all_messages)} messages with a total of {len(all_updates)} updates on Telegram!")
       return None
-
-handler(None, None)

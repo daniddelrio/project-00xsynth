@@ -11,6 +11,7 @@ logger = setup_logger("scrape_liked")
 
 def handler(event, context):
     TWITTER_BEARER_TOKEN = os.environ.get("TWITTER_BEARER_TOKEN")
+    MAX_RESULTS = 20
 
     inputs = db.input
     liked_accounts = []
@@ -21,7 +22,7 @@ def handler(event, context):
         if account_id:
             try:
                 r = requests.get(
-                    f"https://api.twitter.com/2/users/{account_id}/liked_tweets?user.fields=id,description,entities,created_at&expansions=author_id",
+                    f"https://api.twitter.com/2/users/{account_id}/liked_tweets?user.fields=id,description,entities,created_at&expansions=author_id&max_results={MAX_RESULTS}",
                     headers={"Authorization": f"Bearer {TWITTER_BEARER_TOKEN}"},
                 )
                 res = r.json()
