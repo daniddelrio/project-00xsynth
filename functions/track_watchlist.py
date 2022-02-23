@@ -101,3 +101,5 @@ def handler(event, context):
             f"Error in deleting {len(newly_approved_old_ids)} entries from watchlist!"
         )
         return None
+    
+    return { "message": "Success" }

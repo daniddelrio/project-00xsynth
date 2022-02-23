@@ -113,4 +113,4 @@ def handler(event, context):
             )
             return None
 
-    return "Success"
+    return { "message": "Success" }

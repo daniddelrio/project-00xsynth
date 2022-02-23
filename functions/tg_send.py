@@ -61,7 +61,7 @@ def handler(event, context):
       logger.info(
           f"Sent {len(all_messages)} messages with a total of {len(all_updates)} updates on Telegram!"
       )
-      return "Success"
+      return { "message": "Success" }
     except Exception:
       logger.error(f"Error in sending {len(all_messages)} messages with a total of {len(all_updates)} updates on Telegram!")
       return None

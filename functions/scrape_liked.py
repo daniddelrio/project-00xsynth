@@ -53,7 +53,7 @@ def handler(event, context):
         logger.info(
             f"Added {followed_results.upserted_count} unique entries to temp_followed (based on liked tweets)!"
         )
-        return "Success"
+        return { "message": "Success" }
     except Exception:
         logger.error(
             f"Error in adding {len(liked_accounts)} entries to temp_followed (based on liked tweets)!"

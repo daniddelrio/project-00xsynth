@@ -110,7 +110,7 @@ def handler(event, context):
             f"Removing the {data.estimated_document_count()} entries in temp_followed"
         )
         data.drop()
-        return "Success"
+        return { "message": "Success" }
     except Exception:
         logger.error(
             f"There was an error in removing the {data.estimated_document_count()} entries from temp_followed!"
