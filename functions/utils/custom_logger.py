@@ -36,6 +36,8 @@ class JSONFormatter(logging.Formatter):
         return json.dumps(obj)
 
 
+# This logger is for logging relevant information in an organized manner.
+# Obtained from: https://lumigo.io/serverless-monitoring-guide/aws-lambda-python-logging/#structuredlogging
 def setup_logger(module):
     """Create logging object."""
     logger = logging.getLogger(module)

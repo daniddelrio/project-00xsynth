@@ -1,4 +1,3 @@
-from pymongo import MongoClient
 import datetime
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
@@ -7,7 +6,6 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 import time
 from pymongo import UpdateOne
-import traceback
 import os
 from utils.custom_logger import setup_logger
 from utils.mongo_client import db
