@@ -55,24 +55,53 @@ Since we want to run each workflow/script in regular intervals, we use **Amazon 
 
 ### Database Schema + Collections
 `input`
-    - _id: ObjectID
-    - keyword: String
-    - account_id: String
-    - username: String
-    - has_been_scraped: Boolean (default: False, determines whether to scrape ALL following)
-    - keyword_id: ObjectID (reference to input_keyword)
-    - timestamp: Date (required)
-    
+
+_Collection of input Twitter accounts that we want to track_
+
+| Field  | Type | Description |
+| ------------- | ------------- | ------------- |
+| \_id  | ObjectID  | Primary key |
+| username  | String  | Username of the twitter account |
+| account_id  | String  | ID of the Twitter user |
+| timestamp  | Date  | Timestamp when this user was added |
+| has_been_scraped  | Boolean  | Boolean for whether the followers of the user have been scraped before |
+
 `watchlist`
-    - _id: ObjectID
-    - account_id: String (indexed)
-    - timestamp: Date (order by timestamp)
+
+_Collection of watchlist (accounts we didn't initially find a Discord link from)
+
+| Field  | Type | Description |
+| ------------- | ------------- | ------------- |
+| \_id  | ObjectID  | Primary key |
+| account_id  | String  | ID of the Twitter user |
+| timestamp  | Date  | Timestamp when this user was added |
 
 `discord_link`
-    - _id: ObjectID
-    - account_id: String (indexed)
-    - url: String (indexed)
-    - joined: Boolean (default: false)
-    - verified: Boolean (default: false)
-    - valid: Boolean (default: true)
-    - created_at: Date
+
+_Collection of all discord links found_
+
+| Field  | Type | Description |
+| ------------- | ------------- | ------------- |
+| \_id  | ObjectID  | Primary key |
+| url  | String  | Primary key |
+| account_id  | String  | ID of the Twitter user |
+| created_at  | Date  | Timestamp when this discord link was added |
+| joined  | Boolean  | Whether we've joined this server or not |
+| verified  | Boolean  | Whether we've been verified in this server or not |
+| valid  | Boolean  | Whether the invite link is valid or not |
+
+`temp_followed`
+
+_Collection where we temporarily store accounts which we'll categorize_
+
+| Field  | Type | Description |
+| ------------- | ------------- | ------------- |
+| \_id  | ObjectID  | Primary key |
+| name  | String  | Name of the account |
+| id  | String  | ID of the Twitter user |
+| description  | String  | Bio of the user |
+| username  | String  | Username of the account |
+| type  | String  | Whether we got this account from a follow or a like |
+| input  | String  | Username of the source account (i.e. the user we tracked to get this account) |
+| created_at  | Date  | Timestamp when this discord link was added |
+| entities  | Object  | This contains fields which we need to potentially get the Discord links from |
