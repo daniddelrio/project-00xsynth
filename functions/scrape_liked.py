@@ -35,7 +35,7 @@ def handler(event, context):
                         [
                             UpdateOne(
                                 {"id": follow["id"]},
-                                {"$setOnInsert": {**follow, 'type': 'like', 'input': username}},
+                                {"$setOnInsert": {**follow, 'type': 'like', 'input': username, 'source_id': account_id}},
                                 upsert=True,
                             )
                             for follow in res["includes"]["users"]

@@ -10,6 +10,8 @@ logger = setup_logger("scrape_follows")
 
 def handler(event, context):
     TWITTER_BEARER_TOKEN = os.environ.get("TWITTER_BEARER_TOKEN")
+    MAX_RESULTS_FOR_SCRAPED = 50
+    MAX_RESULTS_FOR_NEW = 100
 
     inputs = db.input
     followed_accounts = []
@@ -25,7 +27,7 @@ def handler(event, context):
 
                 if has_been_scraped:
                     r = requests.get(
-                        f"https://api.twitter.com/2/users/{account_id}/following?user.fields=created_at,entities,description&max_results=50",
+                        f"https://api.twitter.com/2/users/{account_id}/following?user.fields=created_at,entities,description&max_results={MAX_RESULTS_FOR_SCRAPED}",
                         headers={"Authorization": f"Bearer {TWITTER_BEARER_TOKEN}"},
                     )
                     res = r.json()
@@ -35,7 +37,7 @@ def handler(event, context):
                             [
                                 UpdateOne(
                                     {"id": follow["id"]},
-                                    {"$setOnInsert": {**follow, 'type': 'follow', 'input': username}},
+                                    {"$setOnInsert": {**follow, 'type': 'follow', 'input': username, 'source_id': account_id}},
                                     upsert=True,
                                 )
                                 for follow in res["data"]
@@ -54,7 +56,7 @@ def handler(event, context):
                             else ""
                         )
                         r = requests.get(
-                            f"https://api.twitter.com/2/users/{account_id}/following?user.fields=created_at,entities,description&max_results=100&{pagination_token}",
+                            f"https://api.twitter.com/2/users/{account_id}/following?user.fields=created_at,entities,description&max_results={MAX_RESULTS_FOR_NEW}&{pagination_token}",
                             headers={"Authorization": f"Bearer {TWITTER_BEARER_TOKEN}"},
                         )
 
@@ -69,7 +71,7 @@ def handler(event, context):
                                 [
                                     UpdateOne(
                                         {"id": follow["id"]},
-                                        {"$setOnInsert": {**follow, 'type': 'follow', 'input': username}},
+                                        {"$setOnInsert": {**follow, 'type': 'follow', 'input': username, 'source_id': account_id}},
                                         upsert=True,
                                     )
                                     for follow in res["data"]
