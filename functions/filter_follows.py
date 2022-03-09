@@ -16,8 +16,8 @@ Steps:
 5. If an element IS in Group B, then we remove it from temp_follows.
 """
 def handler(event, context):
-    # Max length of the follows_ids list; this is 50 because our MAX_RESULTS is also 50 in scrape_follows
-    MAX_RESULTS = 50
+    # Max length of the follows_ids list
+    MAX_RESULTS = 150
   
     latest_follows_per_user = db.latest_follows_per_user.find()
     # Refactor: {source_id: [list of account IDs of follows]} for easier access
