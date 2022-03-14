@@ -31,7 +31,7 @@ def split_character_limit(updates):
   
   return all_messages
 
-# This function consolidates the scraped accounts in "temp_folloewd" and broadcasts them to the Telegram channel
+# This function consolidates the scraped accounts in "temp_followed" and broadcasts them to the Telegram channel
 def handler(event, context):
     data = db.temp_followed
     all_updates = []
@@ -68,8 +68,10 @@ def handler(event, context):
           logger.error(f"There was an error in forming the Telegram message for user {account_id}")
   
     try:
+      # Calls this function, explained above IF we actually have any accounts to broadcast
       if len(all_updates) > 0:
         all_messages = split_character_limit(all_updates)
+        # Sends the messages to the Telegram channel
         telegram_send.send(messages=all_messages, conf=config_path, parse_mode="html")
         logger.info(
             f"Sent {len(all_messages)} messages with a total of {len(all_updates)} updates on Telegram!"
