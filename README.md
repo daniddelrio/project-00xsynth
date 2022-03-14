@@ -17,7 +17,7 @@ Make sure you have Docker installed on your device.
 3. Run `docker-compose push` to push the updated images to the ECR repositories.
 
 ## Diagram Workflow
-![Scraper Flowchart drawio](https://user-images.githubusercontent.com/35568696/156316743-e0048f94-2820-4e5d-8280-43d5491d88b8.png)
+![Scraper Flowchart drawio](https://user-images.githubusercontent.com/35568696/158177708-262be986-e930-4447-9564-215afd8a5462.png)
 
 ## Technologies Used
 These are hosted on AWS, and the database is hosted on MongoDB Atlas. All images are hosted on **Elastic Container Registry (ECR)**. These images are then used to deploy to **Lambda functions**, which represent the workflows/scripts. Some Lambda functions are combined to form one workflow using **Step Functions**.
@@ -34,8 +34,11 @@ Since we want to run each workflow/script in regular intervals, we use **Amazon 
 }
 ```
 
+**filter_follows**
+- This function filters our temp_followed so that we only keep the accounts we haven't scraped before.
+
 **follows_category**
-- This function categorizes all the scraped accouunts in the `temp_followed` collection according to if they have a Discord URL in their bios.
+- This function categorizes all the scraped accounts in the `temp_followed` collection according to if they have a Discord URL in their bios.
 
 **join_discord**
 - This function scrapes the `discord_links` collection and attempts to join these servers.
@@ -45,7 +48,6 @@ Since we want to run each workflow/script in regular intervals, we use **Amazon 
 
 **scrape_liked**
 - This function scrapes the accounts of the tweets that the input accounts like and adds them to the `temp_followed` collection.
-
 
 **tg_send**
 - This function consolidates the scraped accounts in `temp_followed` and broadcasts them to the Telegram channel.
@@ -90,6 +92,17 @@ _Collection of all discord links found_
 | verified  | Boolean  | Whether we've been verified in this server or not |
 | valid  | Boolean  | Whether the invite link is valid or not |
 
+`latest_follows_per_user`
+
+_Collection of accounts that we've recently scraped, which we got from the latest follows of our input accounts (AKA our source accounts)_
+
+| Field  | Type | Description |
+| ------------- | ------------- | ------------- |
+| \_id  | ObjectID  | Primary key |
+| source_id  | String  | Twitter ID of the source account
+| follows_ids  | Array (String)  | List of IDs of the accounts we recently scraped from this source account. The last account of the list will be popped from the array as we add a new entry. |
+| timestamp  | Date  | Timestamp when this entry was last updated |
+
 `temp_followed`
 
 _Collection where we temporarily store accounts which we'll categorize_
@@ -103,5 +116,6 @@ _Collection where we temporarily store accounts which we'll categorize_
 | username  | String  | Username of the account |
 | type  | String  | Whether we got this account from a follow or a like |
 | input  | String  | Username of the source account (i.e. the user we tracked to get this account) |
+| source_id  | String  | Twitter ID of the source account
 | created_at  | Date  | Timestamp when this discord link was added |
 | entities  | Object  | This contains fields which we need to potentially get the Discord links from |
