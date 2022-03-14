@@ -68,14 +68,16 @@ def handler(event, context):
           logger.error(f"There was an error in forming the Telegram message for user {account_id}")
   
     try:
-      # Calls this function, explained above
-      all_messages = split_character_limit(all_updates)
-
-      # Sends the messages to the Telegram channel
-      telegram_send.send(messages=all_messages, conf=config_path, parse_mode="html")
-      logger.info(
-          f"Sent {len(all_messages)} messages with a total of {len(all_updates)} updates on Telegram!"
-      )
+      if len(all_updates) > 0:
+        all_messages = split_character_limit(all_updates)
+        telegram_send.send(messages=all_messages, conf=config_path, parse_mode="html")
+        logger.info(
+            f"Sent {len(all_messages)} messages with a total of {len(all_updates)} updates on Telegram!"
+        )
+      else:
+        logger.warning(
+            f"Sent no messages on Telegram!"
+        )
       return { "message": "Success" }
     except Exception:
       logger.error(f"Error in sending {len(all_messages)} messages with a total of {len(all_updates)} updates on Telegram!")

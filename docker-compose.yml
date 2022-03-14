@@ -71,3 +71,13 @@ services:
       - .env
     ports:
       - 9006:8080
+  filter_follows:
+    image: 357518498432.dkr.ecr.ap-southeast-1.amazonaws.com/filter_follows
+    build:
+      context: .
+      args:
+      - FUNCTION_NAME=filter_follows
+    env_file:
+      - .env
+    ports:
+      - 9007:8080
