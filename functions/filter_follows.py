@@ -63,9 +63,8 @@ def handler(event, context):
           followed_results = temp_followed.insert_many(new_temp_followed)
           logger.info(f"Added {len(new_temp_followed)} new temp_followed entries, so that we include only those we haven't scraped!")
         else:
-          logger.info(f"Adding no new entries to temp_followed, so we don't have any new follows!")
+          logger.warning(f"Adding no new entries to temp_followed, so we don't have any new follows!")
     except Exception:
-        import traceback
         logger.error(
             f"Error in dropping {temp_followed_count} entries and adding the {len(new_temp_followed)} unscraped temp_followed entries!"
         )
@@ -82,5 +81,3 @@ def handler(event, context):
         return None
 
     return { "message": "Success" }
-
-handler(None, None)
